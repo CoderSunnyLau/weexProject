@@ -1,0 +1,155 @@
+<template>
+	<wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png" left-item-color="white">
+	<scroller>
+		<div>
+			<div class="pic">
+				<image class="pdt-pic" src="http://58.248.28.209{{pdtPic}}"></image>
+			</div>
+			<div class="pdt-info">
+				<text class="txt pdt-title">{{pdtTitle}}</text>
+				<div class="info"><text class="txt">药品规格：</text><text class="red">{{pdtSpec}}</text></div>
+				<div class="info"><text class="txt">扫码奖励：</text><text class="red">{{giftTotle}}</text><text class="txt">{{giftSpec}}</text></div>
+				<div class="info"><text class="txt">活动日期：</text><text class="txt">{{date}}</text></div>
+				<div class="info"><text class="txt">批准文号：</text><text class="txt">{{appNo}}</text></div>
+				<div class="info"><text class="txt">生产企业：</text><text class="txt">{{pdtCom}}</text></div>
+			</div>
+			<div class="scan-wrap">
+				<div class="scan-gift">
+					<text class="txt-scan">即扫即送</text>
+					<wxc-button type="danger" class="scan-btn" onclick="scan">扫码有奖</wxc-button>
+				</div>
+				<text class="txt txt-dtl">扫描活动药品的药监码，参与扫码活动，即可领取扫码奖励哦！</text>
+			</div>
+		</div>
+	</scroller>
+	</wxc-navpage>
+</template>
+<style>
+.body{
+	background-color: #F4F4F4;
+}
+.pic{
+	align-items:center;
+	background-color: #FFF;
+	border-bottom-width: 2;
+	border-color: #DDD;
+}
+.pdt-pic{
+	width: 500;
+	height: 500;
+}
+.pdt-info{
+	padding-left: 20;
+	padding-bottom: 20;
+	border-bottom-width: 2px;
+	border-color: #DDD;
+}
+.info{
+	flex-direction:row;
+	margin-top: 30;
+}
+.txt{
+	color: #666;
+	font-size: 35;
+	margin-right: 10;
+}
+.pdt-title{
+	margin-top: 20;
+	margin-bottom: 20;
+	font-size: 40;
+}
+.red{
+	color: red;
+	font-size: 38;
+}
+.scan-wrap{
+	padding-left: 20;
+	padding-right: 5;
+}
+.scan-gift{
+	flex-direction:row;
+	align-items:center;
+	justify-content:space-between;
+	padding-right: 45;
+	margin-bottom: 20;
+	margin-top: 20;
+}
+.txt-scan{
+	color:#F00;
+	font-size: 45;
+}
+.scan-btn{
+	background-color: #F50;
+	border-radius: 8;
+	border-width: 0;
+}
+.txt-dtl{
+	margin-bottom: 50;
+}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+	module.exports={
+		data: {
+			navBarHeight:88,
+			title:"活动详情",
+			pdtPic:'',
+			pdtTitle:'',
+			pdtSpec:'',
+			giftTotle:'',
+			giftSpec:'',
+			date:'',
+			appNo:'',
+			pdtCom:''
+		},
+		methods: {
+			pop: function(){
+		        var params = {
+					'animated' : 'true'
+				}
+				navigator.pop(params,function(){});
+			},
+            scan: function(){
+            	modal.alert({
+            		'message':'敬請期待',
+            		'okTitle':'OK'
+            	},function(){});
+            },
+            getUrlParam : function () {
+				var url = this.$getConfig().bundleUrl;
+				var pdtInfo = decodeURIComponent(url.split('=')[1]).split('+');
+				this.pdtPic = pdtInfo[0];
+				this.pdtTitle = pdtInfo[1];
+				this.pdtSpec = pdtInfo[2];
+				this.giftTotle = pdtInfo[3];
+				this.giftSpec = pdtInfo[4];
+				this.date = pdtInfo[5];
+				this.appNo = pdtInfo[6];
+				this.pdtCom = pdtInfo[7];
+			}
+		},
+		created: function(){
+			var me = this;
+
+			// 設置navigator的合理高度
+            me.$getConfig(function (config){
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    me.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(me));
+
+			// 初始化頁面數據
+			me.getUrlParam();
+
+			//navigator的返回點擊事件
+			me.$on('naviBar.leftItem.click',me.pop);
+        }
+	}
+</script>

@@ -1,0 +1,170 @@
+<template>
+	<wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="药扫码" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png" left-item-color="white">
+			<list>
+				<cell class="list-panel" repeat="pdt in pdts" onclick="pdtDtl">
+					<div class="hid-info">{{pdt.iconPath}}+{{pdt.productName}}+{{pdt.spec}}+{{pdt.rebate1}}+{{pdt.baseUnit}}+{{pdt.beginDate}}—{{pdt.endDate}}+{{pdt.approvalNo}}+{{pdt.manufacturer}}</div>
+					<div class="pdt-info">
+						<image class="pdt-pic" src="http://58.248.28.209{{pdt.iconPath}}"></image>
+						<div class="pdt-dtl">
+							<text class="txt1">{{pdt.productName}} {{pdt.spec}}</text>
+							<text class="txt1">{{pdt.manufacturer}}</text>
+						</div>
+					</div>
+					<div class="line"><div class="line1"></div></div>
+					<div class="scan-panel">
+						<div class="scan-gift">
+							<text class="txt2">扫码奖励</text><text class="txt3">{{pdt.rebate1}}</text><text class="txt4">{{pdt.baseUnit}}</text>
+						</div>
+				    	<wxc-button class="scan-btn" type="warning" size="middle" value="扫码有奖" onclick="scan"></wxc-button>
+				    </div>
+			    </cell>
+			</list>
+	</wxc-navpage>
+</template>
+<style>
+.body{
+	background-color: #DDD;
+}
+.list-panel{
+	flex-direction:column;
+	background-color: #F4F4F4;
+	border-bottom-width: 30;
+	border-color: #DDD;
+	padding-bottom: 10;
+}
+.hid-info{
+	width: 0;
+	height: 0;
+}
+.pdt-info{
+	flex-direction:row;
+}
+.scan-panel{
+	flex-direction:row;
+	justify-content:space-between;
+	align-items:center;
+	margin-left: 20;
+	margin-right: 20;
+}
+.pdt-pic{
+	width: 180;
+	height: 180;
+}
+.pdt-dtl{
+	justify-content:center;
+	margin-left: 10;
+}
+.line{
+	align-items:center;
+	margin-bottom: 10;
+}
+.line1{
+	border-bottom-width: 2px;
+	border-top-width: 2px;
+	border-bottom-color: #FFF;
+	border-top-color: #DDD;
+	width: 600;
+}
+.txt1{
+	font-size: 33;
+	margin-top: 15;
+	margin-bottom: 15;
+	color:#666;
+}
+.scan-btn{
+	width: 220;
+	background-color: #FF9600;
+	border-radius: 60;
+}
+.scan-gift{
+	flex-direction:row;
+}
+.txt2{
+	margin-right:20;
+	font-size: 38;
+	color:#666;
+}
+.txt3{
+	font-size: 38;
+	color:#F00;
+	max-width: 250;
+}
+.txt4{
+	font-size: 38;
+	color:#000;
+	margin-left: 10;
+}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+	module.exports={
+		data: {
+			navBarHeight:88,
+            pdtListUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.query&mobile=13640273085&password=123321&start=0',
+			pdts:[],
+			getJsonpResult:[],
+			a:''
+		},
+		methods: {
+			pop: function(){
+		        var params = {
+					'animated' : 'true'
+				}
+				navigator.pop(params,function(){});
+			},
+            scan: function(){
+            	modal.alert({
+            		'message':'敬請期待',
+            		'okTitle':'OK'
+            	},function(){});
+            },
+            pdtDtl: function(e){
+            	var url = this.$getConfig().bundleUrl;
+				url = url.split('/').slice(0,-1).join('/')+'/pdtDtl.js?info=';
+                url = url + encodeURIComponent(JSON.stringify(e.target.children[0].attr.value).split('"')[1]);
+                var params = {
+                    'url': url,
+                    'animated' : 'true',
+                }
+                navigator.push(params,function(){});
+            }
+		},
+		created: function(){
+			var me = this;
+            //設置navigator的合理高度
+            me.$getConfig(function (config){
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    me.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(me));
+
+			//navigator的返回點擊事件
+			me.$on('naviBar.leftItem.click',me.pop);
+			
+			//獲取商品列表
+            stream.fetch({
+                method: 'GET',
+                url: me.pdtListUrl,
+                type:'json'
+            },function(response){
+                if(!response.ok){
+                    me.getJsonpResult = "request failed";
+                }else{
+                    var resLength = response.data.results[0].products.length;
+                	for(var i = 0; i < resLength; i++){
+                		me.pdts.push(response.data.results[0].products[i]);
+                	}
+                }
+            },function(response){
+                me.getJsonpResult = "bytes received:"+response.length;
+            });
+        }
+	}
+</script>

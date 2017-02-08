@@ -1,11 +1,10 @@
 <template>
     <wxc-navpage data-role="none" height={{navBarHeight}} background-color="#f00" title={{title}} title-color="white">
-        <scroller>
             <div class="login-wrap">
                 <div class="login-cnt">
                     <div class="input-item ii1">
                         <image class="login-pic" src="{{idPic}}"></image>
-                        <input class="id" type="tel" onchange="phnChange" maxlength="11" placeholder="手机号码" />
+                        <input class="id" type="tel" onchange="phnChange" maxlength="11" placeholder="手机号码" value="{{phoneNum}}" />
                     </div>
                     <div class="input-item ii2">
                         <image class="login-pic" src="{{pswPic}}"></image>
@@ -16,7 +15,6 @@
                     <!--<div><text>{{success}}  {{getJsonpResult}}</text></div>-->
                 </div>
             </div>
-        </scroller>
     </wxc-navpage>
 </template>
 <script>
@@ -40,6 +38,20 @@
             test:''
         },
         methods: {
+            getPhoneNum:function(){
+                var url = this.$getConfig().bundleUrl;
+                modal.alert({
+                    'message':url,
+                    'okTitle':'OK'
+                },function(){});
+                console.log("lllllllllllll" + ((url.split("?")[1]) == undefined));
+                if(url.split("?")[1] == undefined){
+                    this.phoneNum = "";
+                }else{
+                    var array = url.split("?")[1].split("=");
+                    this.phoneNum = array[0] == "mobile" ? array[1] : ""; 
+                }
+            },
             phnChange: function(event){
                 this.phoneNum = event.value;
             },
@@ -107,13 +119,18 @@
                 }
             },
             register:function(){
-                modal.alert({
-                    'message':'敬請期待',
-                    'okTitle':'OK'
-                },function(){});
+                var url = this.$getConfig().bundleUrl;
+                url = url.split('/').slice(0,-1).join('/')+'/register.js';
+                var params = {
+                    'url': url,
+                    'animated' : 'true',
+                }
+                navigator.push(params,function(){});
             }
         },
         created: function(){
+            this.getPhoneNum();
+
             this.$getConfig(function (config) {
                 var env = config.env;
                 if(env.platform == 'iOS'){

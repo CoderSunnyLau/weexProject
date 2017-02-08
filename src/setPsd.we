@@ -1,0 +1,214 @@
+<template>
+    <wxc-navpage data-role="none" height={{navBarHeight}} background-color="#f00" title={{title}} title-color="white">
+            <div class="login-wrap">
+                <div class="login-cnt">
+                    <div class="input-item ii1">
+                        <image class="login-pic" src="{{idPic}}"></image>
+                        <text>{{phoneNum}}</text>
+                    </div>
+                    <div class="input-item ii2">
+                        <image class="login-pic" src="{{pswPic}}"></image>
+                        <input class="id" type="password" onchange="psdChange" maxlength="14" placeholder="请输入密码" />
+                    </div>
+                    <div class="input-item ii2">
+                        <image class="login-pic" src="{{pswPic}}"></image>
+                        <input class="id" type="password" onchange="comPsdChange" maxlength="14" placeholder="请再次输入密码" />
+                    </div>
+                    <wxc-button class="login-btn" value="注册" type="success" onclick="register"></wxc-button>
+                    <div><text>{{success}}  {{getJsonpResult}}</text></div>
+                </div>
+            </div>
+    </wxc-navpage>
+</template>
+<style>
+.login-wrap{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    height: 1500;
+    background-color: #DDD;
+}
+.login-cnt{
+    margin-top: 350;
+    width: 650;
+    height: 202;
+    flex-direction:column;
+}
+.input-item{
+    width: 650;
+    height: 100;
+    background-color: #FFF;
+    align-items:center;
+    justify-content:flex-start;
+    flex-direction:row;
+}
+.ii1{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-width: 2px;
+    border-bottom-color: #DDD;
+}
+.ii2{
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+.id,.psd{
+    width:550;
+    height: 100;
+}
+.vldcode{
+    width: 360;
+}
+.vldcode-btn{
+    justify-content:center;
+    align-items:center;
+    width: 190;
+    height: 70;
+    border-radius: 0;
+    margin-right: 20;
+}
+.no-click{
+    background-color: #F50;
+}
+.clicked{
+    background-color: #AAA;
+}
+.txt1{
+    color: #FFF;
+    font-size: 30;
+}
+.login-btn{
+    width: 650;
+    height: 95;
+    background-color: #F00;
+    margin-top: 50;
+    border-width: 0;
+    color: #FFF;
+    border-radius: 10px;
+}
+.reg{
+    width: 650;
+    margin-top: 20;
+    align-items:flex-end;
+}
+.reg-text{
+    font-size: 40px;
+    color: #F00;
+}
+.login-pic{
+    width: 38;
+    height: 38;
+    margin-left: 25;
+    margin-right: 20;
+}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+    module.exports = {
+        data: {
+            navBarHeight: 88,
+            title: '快速注册',
+            idPic: 'http://file.ry600.com/snapshot/vms/site/di/di70684438lrfavs/du9sks0f7yefy23z/image/user_bac1.png',
+            pswPic: 'http://file.ry600.com/snapshot/vms/site/di/di70684438lrfavs/du9sks0f7yefy23z/image/pws_bac.png',
+            getVldCodeUrl: 'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.getValidCode&mobile=',
+            registerUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.registerUser&mobile=',
+            phoneNum: '',
+            psd:'',
+            comPsd:'',
+            success: '',
+            userName:'',
+            click:'no-click',
+            test:''
+        },
+        methods: {
+            getPhoneNum:function(){
+                var url = this.$getConfig().bundleUrl;
+                this.phoneNum = url.split('=')[1];
+            },
+            psdChange: function(e){
+                this.psd = e.value;
+            },
+            comPsdChange: function(e){
+                this.comPsd = e.value;
+            },
+            alertMsg:function(a){
+                var msg = '';
+                switch(a){
+                    case 1: msg = '请输入11位数手机号';break;
+                    case 2: msg = '请输入6~14位密码';break;
+                    case 3: msg = '请再次输入密码';break;
+                    case 4: msg = '两次输入的密码不一致';break;
+                }
+                modal.alert({
+                    'message':msg,
+                    'okTitle':'OK'
+                },function(){});
+            },
+            register:function(){
+                if(this.psd.length < 6){
+                    this.alertMsg(2);
+                }else if(this.comPsd.length < 1){
+                    this.alertMsg(3);
+                }else if(this.psd != this.comPsd){
+                    this.alertMsg(4);
+                }else{
+                    var me = this;
+                    var url = this.registerUrl + this.phoneNum + "&password=" + this.psd + "&comPassword=" + this.comPsd;
+                    modal.alert({
+                        'message':url,
+                        'okTitle':'OK'
+                    },function(){});
+                    stream.fetch({
+                        method: 'GET',
+                        url: url,
+                        type:'json'
+                    },function(response) {
+                        if(!response.ok){
+                            me.getJsonpResult = "request failed";
+                        }else{
+                            me.getJsonpResult = JSON.stringify(response.data);
+                            me.success = response.data.success;
+                            if(me.success){
+                                //  註冊成功
+                                var url = me.$getConfig().bundleUrl;
+                                url = url.split('/').slice(0,-1).join('/')+'/login.js?mobile=' + me.phoneNum;
+                                modal.alert({
+                                    'message':url,
+                                    'okTitle':'OK'
+                                },function(){});
+                                var params = {
+                                    'url':url,
+                                    'animate':'true'
+                                }
+                                navigator.push(params,function(){});
+                            }else{
+                                //  驗證碼有誤
+                                modal.alert({
+                                    'message':'注册失败',
+                                    'okTitle': 'OK'
+                                },function(){});
+                            }
+                        }
+                    },function(response){
+                        me.getJsonpResult = "bytes received:"+response.length;
+                    });
+                }
+            }
+        },
+        created: function(){
+            this.getPhoneNum();
+            this.$getConfig(function (config) {
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    this.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(this));
+        }
+    }
+</script>

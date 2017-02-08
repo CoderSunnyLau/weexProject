@@ -1,0 +1,233 @@
+<template>
+    <wxc-navpage data-role="none" height={{navBarHeight}} background-color="#f00" title={{title}} title-color="white">
+            <div class="login-wrap">
+                <div class="login-cnt">
+                    <div class="input-item ii1">
+                        <image class="login-pic" src="{{idPic}}"></image>
+                        <input class="id" type="tel" onchange="phnChange" maxlength="11" placeholder="手机号码" />
+                    </div>
+                    <div class="input-item ii2">
+                        <image class="login-pic" src="{{pswPic}}"></image>
+                        <input class="id vldcode" type="tel" onchange="vldCodeChange" maxlength="6" placeholder="验证码" />
+                        <div class="vldcode-btn {{click}}" onclick="getVldCode"><text class="txt1">获取验证码</text></div>
+                    </div>
+                    <wxc-button class="login-btn" value="注册" type="success" onclick="setPsd"></wxc-button>
+                    <div><text>{{success}}  {{getJsonpResult}}</text></div>
+                </div>
+            </div>
+    </wxc-navpage>
+</template>
+<style>
+.login-wrap{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    height: 1500;
+    background-color: #DDD;
+}
+.login-cnt{
+    margin-top: 350;
+    width: 650;
+    height: 202;
+    flex-direction:column;
+}
+.input-item{
+    width: 650;
+    height: 100;
+    background-color: #FFF;
+    align-items:center;
+    justify-content:flex-start;
+    flex-direction:row;
+}
+.ii1{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-width: 2px;
+    border-bottom-color: #DDD;
+}
+.ii2{
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+.id,.psd{
+    width:550;
+    height: 100;
+}
+.vldcode{
+    width: 360;
+}
+.vldcode-btn{
+    justify-content:center;
+    align-items:center;
+    width: 190;
+    height: 70;
+    border-radius: 0;
+    margin-right: 20;
+}
+.no-click{
+    background-color: #F50;
+}
+.clicked{
+    background-color: #AAA;
+}
+.txt1{
+    color: #FFF;
+    font-size: 30;
+}
+.login-btn{
+    width: 650;
+    height: 95;
+    background-color: #F00;
+    margin-top: 50;
+    border-width: 0;
+    color: #FFF;
+    border-radius: 10px;
+}
+.reg{
+    width: 650;
+    margin-top: 20;
+    align-items:flex-end;
+}
+.reg-text{
+    font-size: 40px;
+    color: #F00;
+}
+.login-pic{
+    width: 38;
+    height: 38;
+    margin-left: 25;
+    margin-right: 20;
+}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+    module.exports = {
+        data: {
+            navBarHeight: 88,
+            title: '快速注册',
+            idPic: 'http://file.ry600.com/snapshot/vms/site/di/di70684438lrfavs/du9sks0f7yefy23z/image/user_bac1.png',
+            pswPic: 'http://file.ry600.com/snapshot/vms/site/di/di70684438lrfavs/du9sks0f7yefy23z/image/pws_bac.png',
+            getVldCodeUrl: 'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.getValidCode&mobile=',
+            vldCodeUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.ValidCode&mobile=',
+            phoneNum: '',
+            vldCode: '',
+            success: '',
+            userName:'',
+            click:'no-click',
+            test:''
+        },
+        methods: {
+            phnChange: function(e){
+                this.phoneNum = e.value;
+            },
+            vldCodeChange: function(e){
+                this.vldCode = e.value;
+            },
+            getVldCode:function(){
+                if(this.phoneNum.length < 11){
+                    modal.alert({
+                        'message':'请输入正确的手机号码',
+                        'okTitle':'OK'
+                    },function(){});
+                }else{
+                    var me = this;
+                    var url = this.getVldCodeUrl + this.phoneNum;
+                    stream.fetch({
+                        method: 'GET',
+                        url: url,
+                        type:'json'
+                    },function(response) {
+                        if(!response.ok){
+                            me.getJsonpResult = "request failed";
+                        }else{
+                            me.getJsonpResult = JSON.stringify(response.data);
+                            me.success = response.data.success;
+                            if(me.success){
+                                //成功發送驗證碼
+                                me.click = "clicked";
+                                var msg = JSON.stringify(response.data.message).split('"')[1];
+                                modal.alert({
+                                    'message':msg,
+                                    'okTitle': 'OK'
+                                },function(){});
+                            }else{
+                                //  驗證碼獲取不成功
+                                var msg = JSON.stringify(response.data.message).split('"')[1];
+                                modal.alert({
+                                    'message':msg,
+                                    'okTitle': 'OK'
+                                },function(){});
+                            }
+                        }
+                    },function(response){
+                        me.getJsonpResult = "bytes received:"+response.length;
+                    });
+                }
+            },
+            setPsd:function(){
+                if(this.phoneNum.length < 11){
+                    modal.alert({
+                        'message':'请输入11位数手机号',
+                        'okTitle':'OK'
+                    },function(){});
+                }else if(this.vldCode.length < 6){
+                    modal.alert({
+                        'message':'请输入6位数验证码',
+                        'okTitle':'OK'
+                    },function(){});
+                }else{
+                    var me = this;
+                    var url = "http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.ValidCode&mobile=" + this.phoneNum + "&validCode=" + this.vldCode;
+                    stream.fetch({
+                        method: 'GET',
+                        url: url,
+                        type:'json'
+                    },function(response) {
+                        if(!response.ok){
+                            me.getJsonpResult = "request failed";
+                        }else{
+                            me.getJsonpResult = JSON.stringify(response.data);
+                            me.success = response.data.success;
+                            if(me.success){
+                                //  驗證碼輸入正確
+                                var url = me.$getConfig().bundleUrl;
+                                url = url.split('/').slice(0,-1).join('/')+'/setPsd.js?mobile=' + me.phoneNum;
+                                modal.alert({
+                                    'message':url,
+                                    'okTitle':'OK'
+                                },function(){});
+                                var params = {
+                                    'url':url,
+                                    'animate':'true'
+                                }
+                                navigator.push(params,function(){});
+                            }else{
+                                //  驗證碼有誤
+                                modal.alert({
+                                    'message':'验证码有误',
+                                    'okTitle': 'OK'
+                                },function(){});
+                            }
+                        }
+                    },function(response){
+                        me.getJsonpResult = "bytes received:"+response.length;
+                    });
+                }
+            }
+        },
+        created: function(){
+            this.$getConfig(function (config) {
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    this.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(this));
+        }
+    }
+</script>

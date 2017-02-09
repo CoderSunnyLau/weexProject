@@ -1,0 +1,180 @@
+<template>
+    <wxc-navpage data-role="none" class="body" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="{{leftSrc}}" left-item-color="white">
+		<list class="list">
+			<cell class="item">
+				<div class="btn" onClick="signIn"><text class="text btn-text">{{hasSignInText}}</text></div>
+			</cell>
+			<cell class="item" onClick="myProperty">
+				<text class="text">我的财富</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell class="item">
+				<text class="text">修改个人资料</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell class="item">
+				<text class="text">退出登录</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell class="item">
+				<text class="text">关于我们</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell>
+				<text>{{getJsonpResult}}++{{width}}</text>
+			</cell>
+		</list>
+    </wxc-navpage>
+</template>
+<style>
+	.body{
+		background-color: #EEE;
+	}
+	.list{
+		margin-left: 10;
+		margin-right: 10;
+		margin-top: 10;
+	}
+	.item{
+		flex-direction:row;
+		align-items:center;
+		height:120;
+		border-bottom-width: 1;
+		border-bottom-color: #CCC;
+		border-top-width: 2;
+		border-top-color: #EEE;
+		padding-left: 30;
+		background-color: #FFF;
+	}
+	.text{
+		font-size: 38;
+		color: #444;
+		flex:5;
+	}
+	.btn{
+		flex-direction:row;
+		width: 200;
+		height: 80;
+		background-color: #FF9600;
+		justify-content:center;
+		align-items:center;
+		border-radius: 40;
+	}
+	.btn-text{
+		color:#FFF;
+		text-align: center;
+	}
+	.row{
+		flex:1;
+		align-items:flex-end;
+	}
+	.row-pic{
+		width: 15;
+		height: 30;
+		margin-right: 30;
+	}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+    module.exports = {
+        data: {
+            navBarHeight: 88,
+            title: '个人中心',
+			leftSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png',
+			rowSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-09/7kxxn4aed5stgqj8.png',
+			hasSignInText:'',
+			hasSignInUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.hasSignin&mobile=15555560523&password=111111',
+			signInUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.signin&mobile=15555560523&password=111111&appCode=APP_ANDROID_SHOP',
+            test:'',
+            width:'',
+            getJsonpResult:'kkk'
+        },
+        methods: {
+        	hasSignIn:function(){
+				var me = this;
+        		var url = this.hasSignInUrl;
+        		stream.fetch({
+	                method: 'GET',
+	                url: url,
+	                type:'json'
+	            },function(res){
+	                if(res.ok){
+	                    var hasSignin = JSON.stringify(res.data.results[0].hasSignin);
+	                    console.log("bbbbbbbbbbbbb" + hasSignin);
+	                    if(hasSignin == 1){
+	                    	me.hasSignInText = "签到";
+	                    }else{
+	                    	me.hasSignInText = "已签到";
+	                    }
+	                }else{
+	                	me.getJsonpResult = "request failed";
+	                }
+	            },function(){});
+        	},
+        	signIn:function(){
+        		if(this.hasSignInText == "签到"){
+        			var me = this;
+	        		var url = this.hasSignInUrl;
+	        		stream.fetch({
+		                method: 'GET',
+		                url: url,
+		                type:'json'
+		            },function(res){
+		                if(!res.ok){
+		                    me.getJsonpResult = "request failed";
+		                }else{
+		                    var hasSignin = JSON.stringify(res.data.results[0].hasSignin);
+		                    console.log("bbbbbbbbbbbbb" + hasSignin);
+	                    	var url = me.signInUrl;
+	                    	stream.fetch({
+	                    		method:'GET',
+	                    		url:url,
+	                    		type:'json'
+	                    	},function(res){
+	                    		if(res.ok){
+	                    			modal.toast({
+	                    				'message':'签到成功',
+	                    				'duration':'0.3'
+	                    			});
+	                    			this.hasSignInText = "已签到";
+	                    		}
+	                    	},function(){});
+		                }
+		            },function(){});
+        		}else{
+        			modal.toast({
+        				'message':'您已签过到',
+        				'duration':'0.3'
+        			});
+        		}
+        	},
+        	myProperty:function(){
+        		console.log("sdfaaaaaaaaa");
+        	}
+        },
+        created: function(){
+        	this.hasSignIn();
+
+            this.$getConfig(function (config) {
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    this.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(this));
+        }
+    }
+</script>

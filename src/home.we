@@ -1,5 +1,5 @@
 <template>
-    <wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png" left-item-color="white">
+    <wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-09/7h9v0e5f2yst5oic.png" left-item-color="white">
         <div>
 		<image class="topPic" src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-06/c6raznymddkjy4wk.jpg"></image>
 	</div>
@@ -72,6 +72,9 @@
                     'animated' : 'true',
                 }
                 navigator.push(params,function(){});
+			},
+			userInfo:function(){
+				
 			}
         },
         created: function(){

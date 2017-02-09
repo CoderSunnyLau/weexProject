@@ -44,6 +44,7 @@
                     'message':url,
                     'okTitle':'OK'
                 },function(){});
+                console.log(url);
                 console.log("lllllllllllll" + ((url.split("?")[1]) == undefined));
                 if(url.split("?")[1] == undefined){
                     this.phoneNum = "";
@@ -57,6 +58,13 @@
             },
             psdChange: function(event){
                 this.psd = event.value;
+            },
+            pop:function(){
+                var me = this;
+                var params = {
+                    'animated':'false'
+                }
+                navigator.pop(params,function(){});
             },
             home:function(){
                 var url = this.$getConfig().bundleUrl;
@@ -99,7 +107,7 @@
                                     'message':'登录成功',
                                     'duration':'0.5'
                                 });
-
+                                me.pop();
                                 me.home();
 
                                 modal.alert({

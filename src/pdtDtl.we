@@ -1,5 +1,5 @@
 <template>
-	<wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png" left-item-color="white">
+	<wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="{{leftSrc}}" left-item-color="white">
 	<scroller>
 		<div>
 			<div class="pic">
@@ -97,6 +97,7 @@
 		data: {
 			navBarHeight:88,
 			title:"活动详情",
+			leftSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png',
 			pdtPic:'',
 			pdtTitle:'',
 			pdtSpec:'',

@@ -177,7 +177,7 @@
                                 var url = me.$getConfig().bundleUrl;
                                 url = url.split('/').slice(0,-1).join('/')+'/login.js?mobile=' + me.phoneNum;
                                 modal.alert({
-                                    'message':url,
+                                    'message':'注册成功',
                                     'okTitle':'OK'
                                 },function(){});
                                 var params = {

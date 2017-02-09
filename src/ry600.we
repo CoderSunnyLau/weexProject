@@ -1,0 +1,98 @@
+<template>
+	<wxc-navpage class="body" data-role="none" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png" left-item-color="white">
+	    <div class="wrapper">
+	        <div class="toolbar" append = "tree">
+	            <wxc-button type="primary" size="small" value="back" onclick="goback"
+	                    style="margin-left:30px;width:210px; margin-top:5px; margin-bottom:5px"></wxc-button>
+	            <wxc-button type="primary" size="small" value="forward" onclick="goforward"
+	                    style="margin-left:30px;width:210px; margin-top:5px; margin-bottom:5px"></wxc-button>
+	            <wxc-button type="primary" size="small" value="refresh" onclick="refresh"
+	                    style="margin-left:30px;width:210px; margin-top:5px; margin-bottom:5px"></wxc-button>        
+	        </div>
+	        <web class="content" id="webview" src='http://m.ry600.com' onpagestart="startload" onpagefinish="finishload" onerror="failload"></web>
+	    </div>
+    </wxc-navpage>
+</template>
+
+<style>
+    .wrapper { 
+        width: 750; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0;
+    }
+    .content { 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0; 
+        margin-top: 0;  
+        margin-bottom: 70;
+    }
+    .toolbar { 
+        flex-direction: row; 
+        position: fixed; 
+        bottom: 0; 
+        left: 0; 
+        right: 0;  
+        height: 70;
+    }
+</style>
+
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var $webview = require('@weex-module/webview');
+
+    module.exports = {
+        data: {
+            navBarHeight: 88,
+            title: '荣药在线'
+        },
+        methods: {
+            goback: function() {
+                var webElement = this.$el('webview');
+                $webview.goBack(webElement.ref);
+             },
+            goforward: function() {
+                var webElement = this.$el('webview');
+                $webview.goForward(webElement.ref);
+            },
+            refresh: function() {
+                var webElement = this.$el('webview');
+                $webview.reload(webElement.ref);
+            },
+			pop: function(){
+		        var params = {
+					'animated' : 'true'
+				}
+				navigator.pop(params,function(){});
+			},
+            startload: function(e) {
+
+            },
+            finishload: function(e) {
+
+            },
+            failload: function(e) {
+
+            }
+        },
+        created: function(){
+            this.$getConfig(function (config) {
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    this.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(this));
+
+			//navigator的返回點擊事件
+			this.$on('naviBar.leftItem.click',this.pop);
+        }
+    }
+</script>

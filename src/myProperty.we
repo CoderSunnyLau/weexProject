@@ -1,0 +1,182 @@
+<template>
+    <wxc-navpage data-role="none" class="body" height={{navBarHeight}} background-color="#f00" title="{{title}}" title-color="white" left-item-src="{{leftSrc}}" left-item-color="white">
+		<list class="list">
+			<cell class="property">
+	    		<div class="property-left"><text class="text2">账户余额：</text><text class="text">{{myBalance}}元</text></div>
+	    		<div class="property-left"><text class="text2">积分余额：</text><text class="text">{{myPoint}}</text></div>
+    		</cell>
+			<cell class="item" onClick="myProperty">
+				<image class="my-pic" src="{{myBalanceSrc}}"></image>
+				<text class="text">我的资金</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell class="item">
+				<image class="my-pic" src="{{myPointSrc}}"></image>
+				<text class="text">我的积分</text>
+				<div class="row">
+					<image class="row-pic" src="{{rowSrc}}"></image>
+				</div>
+			</cell>
+			<cell>
+				<text>{{getJsonpResult}}++{{width}}</text>
+			</cell>
+		</list>
+    </wxc-navpage>
+</template>
+<style>
+	.body{
+		background-color: #EEE;
+	}
+	.property{
+		flex-direction:column;
+		background-color:#FFF;
+		height: 200;
+		padding-left: 30;
+		border-bottom-width: 1px;
+		border-color: #CCC;
+	}
+	.property-left{
+		flex-direction:row;
+		align-items:center;
+		flex:1;
+	}
+	.list{
+		margin-left: 10;
+		margin-right: 10;
+	}
+	.item{
+		flex-direction:row;
+		align-items:center;
+		height:120;
+		border-bottom-width: 1;
+		border-bottom-color: #CCC;
+		border-top-width: 2;
+		border-top-color: #EEE;
+		padding-left: 30;
+		background-color: #FFF;
+	}
+	.text{
+		font-size: 38;
+		color: #444;
+		flex:5;
+		margin-left: 40;
+	}
+	.text2{
+		font-size: 38;
+		color: #444;
+	}
+	.row{
+		flex:1;
+		align-items:flex-end;
+	}
+	.row-pic{
+		width: 15;
+		height: 30;
+		margin-right: 30;
+	}
+	.my-pic{
+		width: 50;
+		height: 50;
+	}
+</style>
+<script>
+    require('weex-components');
+    var navigator = require('@weex-module/navigator');
+    var modal = require('@weex-module/modal');
+    var stream = require('@weex-module/stream');
+
+    module.exports = {
+        data: {
+            navBarHeight: 88,
+            title: '我的财富',
+			leftSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-01-22/a5y3jh8p8df8lkk4.png',
+			rowSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-09/7kxxn4aed5stgqj8.png',
+			myBalanceSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-09/72u64wcl028aj1p0.png',
+			myPointSrc:'http://file.ry600.com/snapshot//files/af/afvnal1p3sa59q79/2017-02-09/d90d0iit295gjcd0.png',
+			hasSignInUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.hasSignin&mobile=15555560523&password=111111',
+			signInUrl:'http://58.248.28.209/jsonaction/websiteaction.action?action=VSRetail.hasSignin&mobile=15555560523&password=111111&appCode=APP_ANDROID_SHOP',
+			myBalance:'',
+			myPoint:'',
+            test:'',
+            width:'',
+            getJsonpResult:'kkk'
+        },
+        methods: {
+        	hasSignIn:function(){
+				var me = this;
+        		var url = this.hasSignInUrl;
+        		stream.fetch({
+	                method: 'GET',
+	                url: url,
+	                type:'json'
+	            },function(res){
+	                if(res.ok){
+	                    var hasSignin = JSON.stringify(res.data.results[0].hasSignin);
+	                    console.log("bbbbbbbbbbbbb" + hasSignin);
+	                    if(hasSignin == 1){
+	                    	me.hasSignInText = "签到";
+	                    }else{
+	                    	me.hasSignInText = "已签到";
+	                    }
+	                }else{
+	                	me.getJsonpResult = "request failed";
+	                }
+	            },function(){});
+        	},
+        	signIn:function(){
+        		if(this.hasSignInText == "签到"){
+        			var me = this;
+	        		var url = this.hasSignInUrl;
+	        		stream.fetch({
+		                method: 'GET',
+		                url: url,
+		                type:'json'
+		            },function(res){
+		                if(!res.ok){
+		                    me.getJsonpResult = "request failed";
+		                }else{
+		                    var hasSignin = JSON.stringify(res.data.results[0].hasSignin);
+		                    console.log("bbbbbbbbbbbbb" + hasSignin);
+	                    	var url = me.signInUrl;
+	                    	stream.fetch({
+	                    		method:'GET',
+	                    		url:url,
+	                    		type:'json'
+	                    	},function(res){
+	                    		if(res.ok){
+	                    			modal.toast({
+	                    				'message':'签到成功',
+	                    				'duration':'0.3'
+	                    			});
+	                    			this.hasSignInText = "已签到";
+	                    		}
+	                    	},function(){});
+		                }
+		            },function(){});
+        		}else{
+        			modal.toast({
+        				'message':'您已签过到',
+        				'duration':'0.3'
+        			});
+        		}
+        	},
+        	myProperty:function(){
+        		console.log("sdfaaaaaaaaa");
+        	}
+        },
+        created: function(){
+        	this.hasSignIn();
+
+            this.$getConfig(function (config) {
+                var env = config.env;
+                if(env.platform == 'iOS'){
+                    var scale = env.scale;
+                    var deviceWidth = env.deviceWidth / scale;
+                    this.navBarHeight = 64.0 * 750.0 / deviceWidth;
+                }
+            }.bind(this));
+        }
+    }
+</script>
